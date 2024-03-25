@@ -1,0 +1,39 @@
+CONFIGURING OUR FIRST ROUTER
+================================
+1st layout
+==========
+Place a router and a switch together joined with a copper straight through cable
+Attach a computer to the switch with a straight through connecting to the Fast ethernet port on the switch and the PC
+Connect to the Gigabit ethernet ports between the swtich and the router
+Now for the laptop to the router connect them using a console cable connecting to the console port on both.
+To configure the router, click on the laptop, go to DESKTOP and go to terminal
+In the terminal, say no to auto config
+type `enable`, PRESS ENTER
+type `configure terminal`, press ENTER
+type `hostname router0` (with the router name), press ENTER
+go into interface by: `interface GigabitEthernet 0/1`
+set IP address: `ip address 10.0.0.1 255.255.255.0 `
+`no shutdown` PRESS ENTER
+
+NOW THE ROUTER IN CONFIGURED
+
+Tip: place labels on cables using notes press N and write note in location
+
+
+Now IP config on PC
+Click on the PC and go to the DESKTOP tab, select IP configuration
+set the IP ADDRESS, SUBNET MASK
+we used 10.0.0.10, 255.255.255.0, close it 
+SET gateway to router's ip
+and go to DESKTOP and go to COMMAND PROMPT we'll ping the router by:
+`ping 10.0.0.1`
+
+SIMULATION MODE
+===============
+In simulation mode, we get a snapshot state so the time freezes
+We then run our `ping 10.0.0.1` and see the step-by-step procedure
+In the packet that it transmitted we can click on and view its details
+We can control the playback of the simulation with video controls, and see the details and state at each step
+
+To ping without going into the command prompt, we can use Add Simple PDU from the toolbar
+Click on source, then click on dest

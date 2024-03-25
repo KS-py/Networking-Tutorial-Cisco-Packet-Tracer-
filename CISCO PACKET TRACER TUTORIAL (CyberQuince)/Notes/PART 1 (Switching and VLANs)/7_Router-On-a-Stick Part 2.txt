@@ -1,0 +1,81 @@
+Router-on-a-stick PART 2
+============================
+Using the topology, configure :
+1. Hostname according to the diagram + Rapid PVST on all switches
+2. Access interfaces and VLANs - 8 interfaces per VLAN + PortFast
+3. Trunk interfaces
+4. Configure Root switches according to all the diagram 
+5. VTP: S7 is the server, all others clients 
+6. Router on a stick according to the diagram
+7. IP addresses on PCs, DHCP server on R1 for all VLANs
+
+
+Note that the router does not have the additional Fast Ethernet (Fast Ethernet 1/0) interface so we'll add it manually
+
+To get the additional FastEthernet 1/0 on R1, add this module on the router (2811) physical config:
+`NM-1FE-TX`:
+Open the router
+Be in the physical menu
+Turn it off
+Drag out the port interface 
+and drag the NM-1FE-TX into its place
+
+
+SOLUTIONS:
+==========
+1.
+In the config mode of switch:
+`hostname S1`
+`spanning-tree mode rapid-pvst`
+
+2.
+Access interfaces and VLANs
+To shorten all this just type all the configuration commands
+for each vlan 
+Copy the text for this,
+enter config mode on switch and click on paste button
+and close CLI 
+
+3.Likewise for trunk interfaces the same approach above can be applied,
+remember to also set the FastEthernet 0/24s connecting the router to trunk 
+
+
+4. 
+Navigate to the assigned ROOT BRIDGE
+`spanning-tree vlan 700 root primary` on S2
+
+`spanning-tree vlan 800 root primary` on S7
+
+`spanning-tree vlan 900 root primary` on S6
+
+
+5.
+On S7:
+`vtp mode server`
+`vtp domain Kojo`
+`vtp password kojo`
+
+and create the VLANs on it:
+`vlan 700`
+`name Blue` etc.. for all three
+
+For all other switches which will be clients:
+Copy and paste this snippet in each's CLI
+`vtp mode client`
+`vtp domain Kojo`
+`vtp password kojo`
+
+
+6. 
+On router:
+`int f0/0`
+`no shutdown` for each FastEthernet interface
+
+DO THE ROUTER-ON-A-STICK CONFIG
+
+exclude the first 10 address of each VLAN
+
+7. Configure DHCP on the ROUTER and PCs later
+
+
+

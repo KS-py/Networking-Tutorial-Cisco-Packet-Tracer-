@@ -1,0 +1,112 @@
+VLANs
+=======
+There is often the need for communication to be restricted between hosts of the same network. Achieved by using VLANs
+
+VLAN membership is configured on a layer2 switch
+The interfaces of the switch connected to end devices must be in ACCESS MODE to be configured as VLANs, those between switches must be in TRUNK MODE
+
+Create a VLAN:
+Switch(config)> vlan X
+
+Configure Access/Trunk:
+Switch(config)> interface FastEthernet 0/1
+Switch(config-if)> switchport mode access
+Switch(config-if)> switchport access vlan X
+
+Switch(config)> interface FastEthernet 0/2
+Switch(config-if)> switchport mode trunk
+
+ACCESS links can only carry ONE VLAN
+
+TRUNK links can carry many VLANs so long as they exist on the switch
+
+
+For our exercise:
+1. Hostname according to the diagram, and a banner on Switch1 with my name
+Configure:
+2. Access interfaces and VLANs
+3. Trunk interfaces
+4. IP addresses on PCs
+5. Why can't PC2 ping PC4 and fix this issue
+
+
+1.
+For the switches, click on them and go to CLI
+In there, type `enable` ENTER `configure terminal` ENTER
+to change hostname:
+`hostname [name]`
+for banner:
+`banner motd #Kojo S#`
+
+2. 
+Configure the access ports
+Select the end device interface 
+`interface FastEthernet 0/1`
+
+`switchport mode access`
+`switchport access vlan 5`
+
+returns an error message since vlan 5 is non-existent
+`exit`
+In switch(config)>: `vlan 7`
+To create vlan 7
+
+Now go to the interface that will be on vlan 7
+`interface FastEthernet 0/2`
+
+3.
+All layer2 switches are by default set to dynamic auto mode, so if the end device connected to the switch does not actively try to change its link to a trunk link it will always be in access mode.
+
+`show interfaces switchport` = to see all modes the interface is in
+
+
+To change one GigabitEthernet interface to trunk, we nav to the switch CLI and type the ff:
+`enable`
+`configure terminal`
+`interface g0/1`
+
+(config-if)# switchport mode trunk
+
+now the interface will be set to trunk
+to check from the config subshell:
+`do show interfaces switchport`
+
+Now to set the GigabitEthernet interfaces on the switch connected to the two other switches
+we use:
+`interface range GigabitEthernet 0/1-2 ` == selects the interfaces 0/1 and 0/2, range can only be used on consecutive interfaces
+
+ 
+4. Set the IP addresses on the PCs by going to the IP configuration menu on the PCs, we used a class C address by default (192.168.1.X/24) X!=0
+
+
+5.
+NOTE: ERROR IN PINGING IN MY INITIAL EXAMPLE WAS DUE TO GIGABITETHERNET BEING DOWN
+(Make new connection and check to see if up again before pinging)
+
+PINGING between PCs of the same VLAN was successful but pinging VLAN 7 PCs failed
+To see failed ping in detail, we go to Simulation mode instead of Realtime mode
+
+IN the step by step mode we see that the packet from VLAN 7 client to the other gets discarded at switch 2
+To know more, click on blinking discarded packet at switch 2 and go to the last OSI layer displayed.
+There, the error will be shown.
+
+Our error however was that the switch 2 didn't have the VLAN 7 on its system prior to receiving the packet for VLAN 7 client 2.
+By our layout switch 2 only knows VLAN 5 since that is the one connected to it from the get-go.
+
+Solution
+==========
+Go back to Realtime,
+Go to switch 2 CLI
+`enable`
+`configure terminal`
+`vlan 7`
+
+
+
+VLAN BACKSTORY
+==============
+When the PC generates a packet for the first time on the network, it does not know that it is part of a VLAN.
+It will create a ICMP packet and send it off down the link, the switch will receive the packet and look at the interface that the packet came from and add a tag saying which VLAN, this packet can only be sent to PCs on VLAN 7 or trunked interfaces.
+Packets are only tagged while they traverse a trunked interface or while processed by a switch.
+PCs don't receive tagged packets.
+Briefly, VLANs are established on switches unbeknownst to the end systems connecting to those switches

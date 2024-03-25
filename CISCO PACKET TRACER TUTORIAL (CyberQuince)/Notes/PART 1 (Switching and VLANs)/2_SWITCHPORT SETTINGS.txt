@@ -1,0 +1,21 @@
+$(config-if)#switchport mode dynamic auto
+Default on a lot of Cisco switches but is changing to dynamic desirable on most new switches
+
+$(config-if)#switchport mode dynamic desirable
+Makes the interface actively attempt to convert the link to a trunk link
+
+$(config-if)#switchport mode trunk
+Puts the interface into permanent trunking mode and negotiates to convert the neighbouring link into a trunk link. The interface becomes a trunk link even if the neighbouring interface is in access mode
+
+$(config-if)#switchport mode nonegotiate
+Prevents the interface from generating DTP(Dynamic Trunk Protocol, the protocol that negotiates trunking modes) frames. Interface must be first set to either trunk or access
+
+
+ADMIN MODE + ADMIN MODE = LINK MODE
+access + dynamic auto = access
+access + dynamic desirable = access
+access + trunk = traffic in the native VLAN will cross the link successfully but other VLANs traffic will not 
+dynamic auto + dynamic auto = access
+dynamic auto + dynamic desirable = trunk
+dynamic auto + trunk = trunk
+

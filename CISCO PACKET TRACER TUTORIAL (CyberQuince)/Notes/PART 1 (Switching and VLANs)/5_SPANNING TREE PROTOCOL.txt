@@ -1,0 +1,117 @@
+SPANNING TREE PROTOCOL
+========================
+BRIDGE LOOP PROBLEM
+PC A sends an ARP packet
+The upper hub forwards that packet to all ports except where the packet came from
+S1 and S2 receive the packet at their interfaces f1 and save PC A's MAC address
+S1 and S2 forward the packets through their f2 ports
+The lower hub receives packets from two sides. It sends the packet ir received from the left side(S1) to  its right side S2 and to PC B. The same happens for the packet received from S2
+S1 and S2 both save this MAC address on their f2 interfaces.
+
+For this reason and some others the STP was formed:
+
+IEEE 801.1d - Spanning tree protocol "scans" the network to find all links, making sure that there are no loops and by switching off all redundant links
+Using STA to figure out the links in the topology, finds loops and blocks all those links that form loops
+In order for this to work all switches must cooperate 
+One of the switches is chosen as the ROOT BRIDGE and becomes the root of the tree
+
+
+In LAYER 3 networks it's routing protocols job to track redundant links
+In LAYER 2 networks, this is done by STP and STA and some other methods we will discuss
+
+The root will be the switch with the lowest priority value,
+If all these are the same then the lowest MAC address is chosen
+
+IT uses BPDU (Bridge Protocol Data Unit) messages (contain priority value, MAC address and some other info)
+All switches in the topology exchange "hello" BPDUs before the ROOT is chosen
+TWO port states: FORWARDING and BLOCKING
+TYPES OF forwarding port modes: root port and designated port
+
+On the root switch, all its port are designated ports (DP)
+On non-root switches, exactly one root port can exist per switch per VLAN.
+A root port is an interface that has the lowest cost from the switch to the root switch
+Here cost is a speed metric, how fast can one reach some point.
+
+Since STP is automatically configured in switches, why do it manually?:
+If you let STP create the tree it can choose an older switch to be ROOT (Since the root will get the most traffic) and leave newer ones with less traffic
+It's also unaware of any specific VLAN configurations on a link, if one trunk link can carry all VLANs and another can't and STP blocks this first one ..there's trouble.
+
+Manual configuration will greatly determine the resulting tree.
+
+COMMANDS:
+(config)> spanning-tree vlan VLAN_ID root primary (will decrease the default priority of switch to 24576) 
+
+	  spanning-tree vlan VLAN_ID root secondary (if secondary is used 28672 will be the priority value)
+	  spanning-tree vlan VLAN_ID priority priority (to 16384)
+
+The default priority value is 32768, and any value entered MUST be an INCREMENT of 4096, highest is 61440
+
+MULTIPLE VLAN STPs
+==================
+Even if you have multiple VLANs in the network you can stillhave a single instance of the STP all VLANs will share that STP but for better utilization of equipment a separate STP for each VLAN is better.
+This is achieved by running a separate instance of STA per VLAN called PVST - Per VLAN Spanning Tree.
+This way some of those links blocked in one STP will not be blocked in other STPs
+
+Since creating the STPs require recalculations of paths when modified which can take longer to converge if network is large hence a version of the STP called 
+RSTP (RAPID STP)will converge faster
+
+(config)> spanning-tree mode rapid-pvst
+
+To speed things up, can be used only on ACCESS links:
+(config)> spanning-tree portfast
+
+Configure all those links that will not be in a loop as this to speed things up and avoid recalculations
+
+NOTE: THE SAME VERSION OF STP SHOULD BE CONFIGURED ON ALL SWITCHES TO AVOID DISCREPANCY AND FUTURE PROBLEMS
+
+
+
+EXERCISES
+=========
+Configure:
+1. Hostname according to the diagram and Rapid PVST on ALL SWITCHES
+2. Access interfaces and VLANs - 8 interfaces per VLAN + PortFast
+3. Trunk interfaces
+4. Configure Root switches according to the diagram
+5. IP addresses on PCs
+6. Save the file now as " STP exercise without VTP.pkt "
+7. Add all VLANs on all switches manually
+
+SOLUTIONS
+==========
+1.
+`enable`
+`conf t`
+`hostname S1`
+
+`spanning-tree mode rapid-pvst` OR `spa mo ra`
+
+
+2. Configure PortFast on links where there will be no loops (usually access links)
+`interface range FastEthernet 0/1-8`
+`switchport mode access`
+`switchport access vlan 10`
+`spanning-tree portfast`
+
+In shorthand:
+`int ran f0/1-8`
+`sw mode acc`
+`sw acc vlan 10`
+`spa portfast`
+
+and for FastEthernet 9-16 = vlan 20
+
+3. 
+`int ran g0/1-2`
+`sw mode trunk`
+
+4. 
+`do show spanning-tree` === check all info about STP on switch`
+
+`spanning-tree vlan 10 root primary` == set switch as ROOT, after doing this run the above command to check the priority value which will have reduced 
+
+
+5.Configure IP addresses statically according to the VLAN info
+
+`show spanning-tree active`
+ALL INTERFACES ON A ROOT BRIDGE WILL BE IN FORWARDING MODE,  and in DESIGNATED role

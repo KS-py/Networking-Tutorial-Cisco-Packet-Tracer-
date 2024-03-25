@@ -1,0 +1,109 @@
+If there is the need for VLANS to communicate a router is needed.
+Router on a stick is a specific configuration whose task is to connect different VLANs
+The "on-a-stick" term is because there are several networks connected to the router, achieved by creating several virtual interfaces on top of physical interfaces.
+Each virtual interface is a gateway for its VLAN
+
+IEEE 802.1q == protocol for marking packets with "VLAN tags".
+Once again remember packets are tagged just before being sent via trunk links and are untagged when they use an access link.
+
+VLAN tagging
+==============
+IEEE 802.1q 
+ISL [Inter Switch Link] (Cisco proprietary)
+
+ISL
+===
+Adds a 26 byte header and a 4 byte CRC suffix to an Ethernet frame sent over a trunk link
+
+EXERCISE
+========
+Recreate the diagram and configure the ff:
+1. Hostname according to the diagram and add a banner on R1 with your name
+2. Access interfaces and VLANs - 8 INTERFACES per VLAN
+3. Trunk interfaces
+4. Make sure to create all VLANs on all switches.
+5. Configure R1 as a "Router-on-a-stick", with a DHCP server for both VLANs
+6. IP addresses on PCs using DHCP
+
+
+SOLUTIONS
+==========
+1. enter switches CLI: 
+`enable`
+`conf t`
+`host S1`
+
+enter Router CLI:
+Choose NO to the initial configuration prompt
+`enable`
+`conf t`
+`host R1`
+`banner motd #KOJO#`
+
+
+2. Enter config mode on switch 1 and do both, for the other switches just do their respective ones
+`interface range FastEthernet 0/1-8`
+`switchport mode access`
+`switchport access vlan 200`
+
+`interface range FastEthernet 0/9-16`
+`switchport mode access`
+`switchport access vlan 100`
+
+3. We'll configure all the trunk interfaces and also configure the interface between the router and the rest of the network as trunk,
+since the router is a gateway. We need this interface to be trunk since the end devices in the network belong to different VLANs
+enter the switch 1 config mode
+`int ran g0/1-2`
+`sw mode trunk`
+
+4. also add the VLANs missing on the other switches since only S1 has both 
+`do show vlan brief` to check vlans on switch
+
+to add vlan:
+`enable`
+`conf t`
+`vlan 100`
+
+5. To configure R1 as a "Router-on-a-stick", with a DHCP server for both VLANs:
+enter config mode on R1 after enable 
+`interface FastEthernet 0/1`
+`no shutdown`
+
+Configure the interface to serve as a gateway for all hosts that use that VLAN
+`interface FastEthernet 0/1.100`  -- Create a virtual sub-interface for VLAN 100 on R1
+`encapsulation dot1Q 100` -- Describes interface to look for on router for incoming packets, ie. add a VLAN tag of 100
+
+Making sure still in sub interface:
+`ip address 192.168.1.1 255.255.255.0` === gateway for vlan 100
+
+`................. 192.169. 2 .1 ...... `  == gateway for vlan 200
+
+
+Setting up DHCP on router.
+Since we know how DHCP works not much theory here
+DHCP DISCOVER
+DHCP OFFER
+DHCP REQUEST 
+DHCP ACK
+We'll have a DHCP server which is the router and the DHCP client as the PCs
+Our DHCP server will figure the origin of packets using the VLAN tags and will receive the 0.0.0.0 address from all the PCs using only the VLAN tag to distinguish,
+after doing this since we've configured the gateways for the VLANs
+
+We'll configure DHCP pools for our VLANs
+Hence:
+>in config mode
+`ip dhcp excluded-address 192.168.1.0 192.168.1.10`
+`ip dhcp excluded-address 192.168.2.0 192.168.2.10`
+
+`ip dhcp pool vlan100`
+`network 192.168.1.0 255.255.255.0`
+`default-router 192.168.1.1`
+
+Likewise for vlan200 but {192.168.2.0} and default-router (gateway) of 192.168.2.1
+
+Now exit and go to each PC's ip configuration and select DHCP instead of static
+It should automatically set the ip address of the client with an ip excluding the excluded-address params
+
+After all is done, to test:
+ping from one PC to the ROUTER
+ping from one PC to another with the same VLAN

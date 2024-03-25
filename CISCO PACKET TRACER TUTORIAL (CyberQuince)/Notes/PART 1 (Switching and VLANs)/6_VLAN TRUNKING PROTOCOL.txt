@@ -1,0 +1,36 @@
+VLAN TRUNKING PROTOCOL (VTP)
+==============================
+It exists so we don't have to manually add VLANs to our switches
+
+Two modes:
+Server 
+Client
+
+Server commands
+===============
+`vtp mode server`
+`vtp domain Kojo`
+`vtp password Kojopassword`
+
+Create vlan and set name:
+`vlan 10`
+`name HR`
+
+Client commands
+===============
+`vtp mode client`
+`vtp password Kojopassword`
+
+
+Exercise:
+Using the pkt file from the previous exercise and configure VTP. The server should be S5 and all other switches should be clients. Name the VLANs on the server according to the diagram below
+
+Remeber: `do show vlan brief` after each iteration to see the VLANs
+NOTE: By default all layer 2 switches are already in `vtp mode server`, and the other switches automatically search for server's domain
+Hence after setting client mode only passing the password as the next command is necessary
+
+After configuring the S5 as server
+Configure all the switches as clients 
+
+Nothing much changed here, just automatically added all VLANs in the network to all the switches
+Test by pinging PCs of the same VLAN
